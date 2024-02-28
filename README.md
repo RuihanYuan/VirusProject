@@ -88,5 +88,5 @@ To generate the input depth file required by the plot generation program, we emp
    samtools depth {ALIGNMENT}.bam > {GENOME}.depth
    ```
 
-**Note**: Samtools `depth` command counts positions starting from 1, in contrast to many other tools that start counting from 0. This is important to remember when interpreting your results.
+**Note**: Samtools `depth` command counts positions starting from 1. This is important to remember when interpreting your results.
 
