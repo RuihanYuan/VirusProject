@@ -36,13 +36,13 @@ To utilize this tool in your NGS data analysis projects, please refer to the fol
 For more detailed information, please refer to the [Installation](#installation) and [Usage](#usage) sections below.
 
 
-## Installation
+## Installation ##
 
-### Prerequisites
+### Prerequisites ###
 
 Before using this tool, you'll need to have Python installed on your system. This program is compatible with Python 3.x versions. If you don't have Python installed, follow the steps below to set it up. 
 
-### Installing Python
+### Installing Python ###
 
 1. **Download Python**: Visit the official Python website at [python.org](https://www.python.org/) and download the latest version of Python 3.x for your operating system (Windows, macOS, or Linux/Unix).
 
@@ -50,3 +50,43 @@ Before using this tool, you'll need to have Python installed on your system. Thi
 
 3. **Verify Installation**: Open your command line interface (CLI) and type `python --version` (or `python3 --version` on some Linux distributions). 
 You should see the Python version you installed displayed, confirming the successful installation.
+
+### Dependencies ###
+With Python step up, the next step is to install the necessary libraries and dependencies fo the tool.
+Such dependencies can be installed using 'pip', Python's package installer.
+```
+pip install seaborn matplotlib numpy
+```
+
+### Usage ###
+
+#### Generating Genome Depth File ####
+
+To generate the input depth file required by the plot generation program, we employ the widely-used tools **BWA** for aligning reads to a reference genome and **Samtools** for processing sequence alignments. This process is designed with a focus on a single contig genome. Follow the steps below to prepare your data:
+
+1. **Format the Reference Genome with BWA**:
+   
+   First, you need to index your reference genome using BWA. This step prepares the genome for alignment.
+   
+   ```
+   bwa index {REFERENCE_GENOME.FASTA}
+   ```
+
+2. **Align Reads to the Reference Genome**:
+   
+   Next, align your sequencing reads to the reference genome. This step uses BWA to perform the alignment and Samtools to sort the resulting BAM file. Adjust `-t 16` according to the number of threads you wish to use for the alignment process.
+   
+   ```
+   bwa mem -t 16 {REFERENCE_GENOME.FASTA} {READS_INPUT} | samtools sort -o {ALIGNMENT}.bam
+   ```
+
+3. **Generate Depth File with Samtools**:
+   
+   With the alignments in a sorted BAM file, you can now generate the depth report using Samtools. This report will serve as the input for the plot generation program.
+   
+   ```
+   samtools depth {ALIGNMENT}.bam > {GENOME}.depth
+   ```
+
+**Note**: Samtools `depth` command counts positions starting from 1, in contrast to many other tools that start counting from 0. This is important to remember when interpreting your results.
+
