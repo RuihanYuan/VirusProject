@@ -99,12 +99,15 @@ To generate the input depth file required by the plot generation program, we emp
    To enhance our understanding of genomic structures, the DNA annotation plot visualizes different genomic features, such as genes, exons, and regulatory regions, each marked according to its biological function. This visualization is crucial for tasks ranging from gene discovery to regulatory element identification.
    
    **Overview of DNAFeaturesViewer**
+   
    We use **DNAFeaturesViewer**, a versatile Python library designed for plotting DNA features. It can interpret data from GenBank, GFF files, or Biopython SeqRecords, allowing for a broad application in genomic studies. Detailed setup instructions are available [here](https://edinburgh-genome-foundry.github.io/DnaFeaturesViewer/).
    
    **Why Annotation Plots Matter**
+   
    Annotation plots are essential for visualizing the physical layout of genes and other features on a genome. They are especially useful in comparative genomics, gene editing studies, and in the annotation of newly sequenced genomes. Such plots help researchers quickly identify regions of interest and assess the completeness and accuracy of genomic annotations.
    
    **Advantages of Combining Annotation with Depth Plots**
+   
    By integrating annotation plots with depth analysis, researchers can not only visualize the functional layout of the genome but also see how thoroughly each segment has been sequenced. This combined visualization approach provides a comprehensive view of both genomic structure and sequencing coverage. It is particularly valuable for identifying less sequenced or missing functional regions that require further attention. Thus, combined plots serve as an excellent tool for refining research areas within the genome, offering a robust method for investigating and addressing gaps in functional regions.
 
 
@@ -112,3 +115,13 @@ To generate the input depth file required by the plot generation program, we emp
    
    We use GFF3 file as input in the annotation plot generation step. GFF3 files for desired genome can be found and downloaded from ncbi.
    
+2. **Customizing the Plot**
+   You can easily customize your plots by modifying the color_mapping dictionary in the script. This allows you to highlight different features in distinct colors, enhancing the plot's readability and focusing on features of interest.
+   ```python
+   # Customizing colors for genomic features
+     color_mapping = {
+       'gene': 'blue',
+       'exon': 'green',
+       'promoter': 'red'
+     }
+   ```
