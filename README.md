@@ -92,7 +92,7 @@ To generate the input depth file required by the plot generation program, we emp
 
 4. **Plot Generation**
 
-   Now, we are ready to use the python script to generate the depth plot. Please refer to the `depth_plot_final.py` in code file.
+   Now, we are ready to use the python script to generate the depth plot. Please refer to the [depth_plot_final.py](./code/depth_plot_final.py).
 
 #### Generating genome Annotation Plot ####
 
