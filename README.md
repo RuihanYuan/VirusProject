@@ -130,5 +130,10 @@ pip install BCBio dna_features_viewer
        'exon': 'green',
        'promoter': 'red'
      }
-   ```
    
+3. **Accessing the Scripts**
+
+   The scripts for generating these plots are located in the code folder. You can refer to the following files for the specific implementations:
+
+   * Annotation Plot: Check out [annotation_plot.py](./code/annotation_plot.py) for the code responsible for generating annotation plots.
+   * Combined Plot: For the combined annotation and depth plots, see [combined_plot.py](./code/combined_plot.py).
