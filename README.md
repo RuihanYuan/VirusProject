@@ -110,6 +110,11 @@ To generate the input depth file required by the plot generation program, we emp
    
    By integrating annotation plots with depth analysis, researchers can not only visualize the functional layout of the genome but also see how thoroughly each segment has been sequenced. This combined visualization approach provides a comprehensive view of both genomic structure and sequencing coverage. It is particularly valuable for identifying less sequenced or missing functional regions that require further attention. Thus, combined plots serve as an excellent tool for refining research areas within the genome, offering a robust method for investigating and addressing gaps in functional regions.
 
+### Dependencies ###
+
+```
+pip install BCBio dna_features_viewer
+```
 
 1. **Input File Download**
    
