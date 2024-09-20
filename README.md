@@ -92,7 +92,7 @@ To generate the input depth file required by the plot generation program, we emp
 
 4. **Plot Generation**
 
-   Now, we are ready to use the python script to generate the depth plot. Please refer to the depth_plot_final.py in code file.
+   Now, we are ready to use the python script to generate the depth plot. Please refer to the `depth_plot_final.py` in code file.
 
 #### Generating genome Annotation Plot ####
 
@@ -116,6 +116,7 @@ To generate the input depth file required by the plot generation program, we emp
    We use GFF3 file as input in the annotation plot generation step. GFF3 files for desired genome can be found and downloaded from ncbi.
    
 2. **Customizing the Plot**
+
    You can easily customize your plots by modifying the color_mapping dictionary in the script. This allows you to highlight different features in distinct colors, enhancing the plot's readability and focusing on features of interest.
    ```python
    # Customizing colors for genomic features
@@ -125,3 +126,4 @@ To generate the input depth file required by the plot generation program, we emp
        'promoter': 'red'
      }
    ```
+   
