@@ -1,0 +1,139 @@
+#! /usr/bin/env python
+# daplot.py
+# creates a combined depth and annotation plot from a depth file and a GFF file
+
+
+from dna_features_viewer import GraphicFeature, GraphicRecord
+import seaborn as sns
+from matplotlib import pyplot as plt, lines
+from BCBio import GFF
+import argparse
+import yaml
+
+
+__version__ = "1.0.0"  # 2024/10/10 HB
+
+
+def parse_depth(depth_input):
+    # Initialize empty list for depth values at each position in the genome
+    depth = []
+    references = set()
+    with open(depth_input) as depth_object:
+        for row in depth_object:
+            genome_id, position, depth_count = row.split()
+            references.add(genome_id)
+            # If multiple genome IDs have been found, raise error
+            if len(references) > 1:
+                raise Exception('This script only handles one genome - contig.')
+            position = int(position) - 1
+            # Num of reads covers a specific position in the genome
+            depth_count = int(depth_count)
+            if position >= len(depth):
+                depth.extend([0] * (position - len(depth) + 1))
+            depth[position] = depth_count
+    return depth
+
+
+def plot_depth(ax, depth_report, normalize, depth_cut_off):
+    data = parse_depth(depth_report)
+    y_label = "Normalized Coverage" if normalize else "Coverage"
+    data = [xx / max(data) for xx in data] if normalize else data
+    sns.set_theme(color_codes=True)
+    sns.lineplot(x=range(len(data)), y=data, ax=ax)
+    ax.set(xlabel='Genome Position (bp)', ylabel=y_label)
+    if not normalize:
+        ax.add_line(lines.Line2D([0, len(data) + 1], [depth_cut_off], color="r"))
+    # print("Plot added to the subplot.")
+
+
+def load_color_settings(yml_file):
+    with open(yml_file, 'r') as file:
+        settings = yaml.safe_load(file)
+    return settings['color_mapping'], settings['default_color']
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Generate combined depth and annotation plots from a depth file and a GFF file.",
+                                     formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument("-id", "--input_depth",
+                        type=str,
+                        required=True,
+                        help='path to the input depth file')
+    parser.add_argument("-ig", "--input_gff",
+                        type=str,
+                        required=True,
+                        help='path to the input GFF file')
+    parser.add_argument("-o", "--output",
+                        type=str,
+                        required=True,
+                        help='path to save the output SVG file')
+    parser.add_argument("-n", "--normalize",
+                        action="store_true",
+                        help=('normalize the depth values\n'
+                              'default = False'))
+    parser.add_argument("-c", "--cutoff",
+                        type=int,
+                        default=20,
+                        help=('depth cutoff value\n'
+                              'default = 20'))
+    parser.add_argument("-y", "--color_settings",
+                        type=str,
+                        help=('path to the color settings YAML file\n'
+                              'defaults to program settings if left blank'))
+    parser.add_argument("-v", "--version",
+                        action='version',
+                        version=f'%(prog)s {__version__}')
+
+    args = parser.parse_args()
+
+    color_mapping = {
+        "P0 protein": "lightpink",
+        "RNA-dependent RNA polymerase": "magenta",
+        "P1 protein": "lightgreen",
+        "coat protein": "yellow",
+        "aphid transmission protein": "orange",
+        # Add more mappings as needed
+    }
+
+    default_color = "grey"
+
+    # Load color settings from the YAML file if provided, otherwise use default settings
+    if args.color_settings:
+        color_mapping, default_color = load_color_settings(args.color_settings)
+
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(6, 3.5), sharex=True, gridspec_kw={"height_ratios": [3, 1]})
+
+    # Open the GFF3 file and parse it
+    with open(args.input_gff, "r") as gff_input:
+        for gff_record in GFF.parse(gff_input):
+            # Create a list of GraphicFeature objects from the CDS features in the SeqRecord
+            graphic_features = [
+                GraphicFeature(
+                    start=int(feature.location.start),
+                    end=int(feature.location.end),
+                    strand=feature.location.strand,
+                    color=color_mapping.get(feature.qualifiers.get(
+                        'product', [''])[0], default_color),
+                    label=feature.qualifiers.get('product', [''])[0]
+                )
+                for feature in gff_record.features if feature.type == "CDS"
+            ]
+
+            # Create a GraphicRecord with the list of GraphicFeature objects
+            graphic_record = GraphicRecord(sequence_length=len(
+                gff_record), features=graphic_features)
+
+            # Plot the graphic record on the first subplot
+            graphic_record.plot(ax=ax1)
+
+    plot_depth(ax2, args.input_depth, normalize=args.normalize, depth_cut_off=args.cutoff)
+    plt.tight_layout()
+    # plt.show()
+    fig.savefig(args.output)
+    fig.savefig(args.output.replace('.png', '.svg'), format='svg')
+
+    print("----PLOT GENERATED----")
+
+
+if __name__ == '__main__':
+    main()

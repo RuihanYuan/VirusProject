@@ -1,0 +1,9 @@
+color_mapping:
+  P0 protein: '#88B04B'
+  RNA-dependent RNA polymerase: '#92A8D1'
+  P1 protein: '#6B5B95'
+  coat protein: '#FF6F61'
+  aphid transmission protein: '#F7CAC9'
+  # Add more mappings as needed
+
+default_color: '#9F9F9F'
