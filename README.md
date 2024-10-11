@@ -63,15 +63,17 @@ After following the installation, the full list of dependencies installed can be
 conda list
 ```
 
-Now, you can clone this project onto any directory on your machine and navigate to the bin folder, where you should see the scripts.
+Now, you can clone this project into a suitable directory on your machine and navigate to the **bin** folder, where you should see the scripts.
 
 To test all the scrips are ready, use:
 
 ```bash
 ./daplot --version
+./dplot --version
+./aplot --version
 ```
 
-and the current version number should be displayed.
+and the current version numbers should be displayed.
 
 ## Preparation
 
