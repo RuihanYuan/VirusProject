@@ -16,15 +16,15 @@ The goal of this tool is to generate depth and annotation plots that visually en
 
 The scripts are written in **Python**, which you will need to run them. Managing Python installations is never easier nowadays with **Anaconda**. We will also use Anaconda to install and manage all of the dependancies. 
 
-To install Anaconda on your machine, please follow the [Anaconda Installation Documentation](https://docs.anaconda.com/anaconda/install/).
+To install Anaconda, please follow the [Anaconda Installation Documentation](https://docs.anaconda.com/anaconda/install/).
 
-After installing Anaconda, to verify you have installed it correctly, use:
+To verify Anaconda has been installed correctly, use:
 
 ```bash
 conda --version
 ```
 
-and if your machine has Anaconda installed, you should see its version info.
+version info should be displayed if Anaconda is installed properly.
 
 To set up the rest of the dependencies, please follow the following steps:
 
@@ -46,7 +46,7 @@ Install the required dependencies:
 conda install -c bioconda -c conda-forge bcbio-gff bwa dna-features-viewer matplotlib pyyaml samtools seaborn
 ```
 
-After following the installation, you should see all of the dependencies installed using:
+After following the installation, the full list of dependencies installed can be viewed using:
 
 ```bash
 conda list
@@ -64,9 +64,9 @@ and the current version number should be displayed.
 
 ## Preparation
 
-To prepare your raw reads into a depth file, we need to map it to the reference genome and sort it. We recommend the widely-used tools **BWA** for the alignment and **Samtools** for further processing. This process is designed with a focus on a single contig genome. Follow the steps below to prepare your data:
+To prepare the raw reads into a depth file, we need to map it to the reference genome and sort it. We recommend the widely-used tools **BWA** for the alignment and **Samtools** for further processing. This process is designed with a focus on a single contig genome. Follow the steps below to prepare your data:
 
-Index your reference genome using BWA:
+Index the reference genome using BWA:
    
 ```bash
 bwa index {REFERENCE_GENOME.FASTA}
@@ -84,9 +84,9 @@ Generate a depth file using samtools:
 samtools depth {ALIGNMENT}.bam > {GENOME}.depth
 ```
 
-**Note**: Samtools `depth` command counts positions starting from 1, which might become relevant when interpreting your results.
+**Note**: Samtools `depth` command counts positions starting from 1, which might become relevant when interpreting results.
 
-Now, your depth file is ready as inputs for our scripts.
+Now, a depth file is ready as inputs for our scripts.
 
 ## Usage
 
@@ -136,7 +136,7 @@ The `aplot` script generates color-coded annotation plots from a GFF file.
 
 To make changes to the color map for each annotated product, please do so in the **color_setting.yml** file in the bin folder and pass it in to override the default settings using the -c argument. Supports hex color codes but make sure to place them in quotes.
 
-Here is an example color_setting.yml file you could use:
+Here is an example color_setting.yml file to use:
 
 ```yml
 color_mapping:
@@ -149,7 +149,7 @@ color_mapping:
 default_color: '#9F9F9F'
 ```
 
-GFF3 files for your genome can be found and downloaded from [NCBI](https://www.ncbi.nlm.nih.gov/). Read more about GFF3 [here](https://www.ncbi.nlm.nih.gov/datasets/docs/v1/reference-docs/file-formats/about-ncbi-gff3/).
+GFF3 files can be found and downloaded from [NCBI](https://www.ncbi.nlm.nih.gov/). Read more about GFF3 [here](https://www.ncbi.nlm.nih.gov/datasets/docs/v1/reference-docs/file-formats/about-ncbi-gff3/).
 
 ### daplot
 
