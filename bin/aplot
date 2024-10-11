@@ -9,7 +9,7 @@ import argparse
 import yaml
 
 
-__version__ = "1.0.0"  # 2024/10/10 HB
+__version__ = "1.1.0"  # 2024/10/11 HB+1
 
 
 def load_color_settings(yml_file):
@@ -54,14 +54,15 @@ def main():
 
     default_color = "grey"
 
-    # Load color settings from the YAML file if provided, otherwise use default settings
+    # Load color settings from the YAML file if provided
     if args.color_settings:
         color_mapping, default_color = load_color_settings(args.color_settings)
 
-    # Initialize an empty list to hold GraphicFeature objects
+    # Initialize empty list
     graphic_features = []
 
-    # Parse the GFF3 file and create GraphicFeature objects
+    print(f"Parsing GFF file {args.input}")
+    # Parse the GFF3 file, create and add GraphicFeature objects to list
     with open(args.input, "r") as gff_input:
         for gff_record in GFF.parse(gff_input):
             for feature in gff_record.features:
@@ -76,14 +77,15 @@ def main():
                         label=product
                     )
                     graphic_features.append(graphic_feature)
+    print(f"Parsed GFF file {args.input}")
 
     # Create a GraphicRecord outside the loop, after all features have been added to the list
-    graphic_record = GraphicRecord(sequence_length=len(
-        gff_record.seq), features=graphic_features)
+    graphic_record = GraphicRecord(sequence_length=len(gff_record.seq), features=graphic_features)
 
-    # Plot the graphic record outside the loop
+    # Plot the graphic record
     ax, _ = graphic_record.plot(figure_width=10)
     ax.figure.tight_layout()
+    print(f"Generating annotation plot as {args.output}")
     # Save the figure to a svg file
     ax.figure.savefig(args.output, format='svg')
 
