@@ -13,84 +13,84 @@ __version__ = "1.1.0"  # 2024/10/11 HB+1
 
 
 def load_color_settings(yml_file):
-    '''
-    To make changes to the annotation colors please visit the color_setting.yml 
-    file in the bin folder and pass it in using the -c argument
-    '''
-    with open(yml_file, 'r') as file:
-        settings = yaml.safe_load(file)
-    return settings['color_mapping'], settings['default_color']
+	'''
+	To make changes to the annotation colors please visit the color_setting.yml 
+	file in the bin folder and pass it in using the -c argument
+	'''
+	with open(yml_file, 'r') as file:
+		settings = yaml.safe_load(file)
+	return settings['color_mapping'], settings['default_color']
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate annotation plots from GFF files.",
-                                     formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument("-i", "--input",
-                        type=str,
-                        required=True,
-                        help='path to the input GFF file')
-    parser.add_argument("-o", "--output",
-                        type=str,
-                        required=True,
-                        help='path to save the output SVG file')
-    parser.add_argument("-y", "--color_settings",
-                        type=str,
-                        help=('path to the color settings YAML file\n'
-                              'defaults to program settings if left blank'))
-    parser.add_argument("-v", "--version",
-                        action='version',
-                        version=f'%(prog)s {__version__}')
+	parser = argparse.ArgumentParser(description="Generate annotation plots from GFF files.",
+									 formatter_class=argparse.RawTextHelpFormatter)
+	parser.add_argument("-i", "--input",
+						type=str,
+						required=True,
+						help='path to the input GFF file')
+	parser.add_argument("-o", "--output",
+						type=str,
+						required=True,
+						help='path to save the output SVG file')
+	parser.add_argument("-y", "--color_settings",
+						type=str,
+						help=('path to the color settings YAML file\n'
+							  'defaults to program settings if left blank'))
+	parser.add_argument("-v", "--version",
+						action='version',
+						version=f'%(prog)s {__version__}')
 
-    args = parser.parse_args()
+	args = parser.parse_args()
 
-    color_mapping = {
-        "P0 protein": "lightpink",
-        "RNA-dependent RNA polymerase": "magenta",
-        "P1 protein": "lightgreen",
-        "coat protein": "yellow",
-        "aphid transmission protein": "orange",
-        # Add more mappings as needed
-    }
+	color_mapping = {
+		"P0 protein": "#da9100",
+		"RNA-dependent RNA polymerase": "#009B77",
+		"P1 protein": "#4D4DFF",
+		"coat protein": "#E40046",
+		"aphid transmission protein": "#FFE900",
+		# Add more mappings as needed
+	}
 
-    default_color = "grey"
+	default_color = "#D9D9D6"
 
-    # Load color settings from the YAML file if provided
-    if args.color_settings:
-        color_mapping, default_color = load_color_settings(args.color_settings)
+	# Load color settings from the YAML file if provided
+	if args.color_settings:
+		color_mapping, default_color = load_color_settings(args.color_settings)
 
-    # Initialize empty list
-    graphic_features = []
+	# Initialize empty list
+	graphic_features = []
 
-    print(f"Parsing GFF file {args.input}")
-    # Parse the GFF3 file, create and add GraphicFeature objects to list
-    with open(args.input, "r") as gff_input:
-        for gff_record in GFF.parse(gff_input):
-            for feature in gff_record.features:
-                if feature.type == "CDS":
-                    product = feature.qualifiers.get('product', [''])[0]
-                    color = color_mapping.get(product, default_color)
-                    graphic_feature = GraphicFeature(
-                        start=int(feature.location.start),
-                        end=int(feature.location.end),
-                        strand=feature.location.strand,
-                        color=color,
-                        label=product
-                    )
-                    graphic_features.append(graphic_feature)
-    print(f"Parsed GFF file {args.input}")
+	print(f"Parsing GFF file {args.input}")
+	# Parse the GFF3 file, create and add GraphicFeature objects to list
+	with open(args.input, "r") as gff_input:
+		for gff_record in GFF.parse(gff_input):
+			for feature in gff_record.features:
+				if feature.type == "CDS":
+					product = feature.qualifiers.get('product', [''])[0]
+					color = color_mapping.get(product, default_color)
+					graphic_feature = GraphicFeature(
+						start  = int(feature.location.start),
+						end    = int(feature.location.end),
+						strand = feature.location.strand,
+						color  = color,
+						label  = product
+					)
+					graphic_features.append(graphic_feature)
+	print(f"Parsed GFF file {args.input}")
 
-    # Create a GraphicRecord outside the loop, after all features have been added to the list
-    graphic_record = GraphicRecord(sequence_length=len(gff_record.seq), features=graphic_features)
+	# Create a GraphicRecord outside the loop, after all features have been added to the list
+	graphic_record = GraphicRecord(sequence_length=len(gff_record.seq), features=graphic_features)
 
-    # Plot the graphic record
-    ax, _ = graphic_record.plot(figure_width=10)
-    ax.figure.tight_layout()
-    print(f"Generating annotation plot as {args.output}")
-    # Save the figure to a svg file
-    ax.figure.savefig(args.output, format='svg')
+	# Plot the graphic record
+	ax, _ = graphic_record.plot(figure_width=10)
+	ax.figure.tight_layout()
+	print(f"Generating annotation plot as {args.output}")
+	# Save the figure to a svg file
+	ax.figure.savefig(args.output, format='svg')
 
-    print("----PLOT GENERATED----")
+	print("----PLOT GENERATED----")
 
 
 if __name__ == '__main__':
-    main()
+	main()
