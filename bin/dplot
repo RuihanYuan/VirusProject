@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt, lines
 import argparse
 
 
-__version__ = "1.0.0"  # 2024/10/10 HB
+__version__ = "1.1.0"  # 2024/10/11 HB+1
 
 
 def parse_depth(depth_input):
@@ -33,6 +33,7 @@ def parse_depth(depth_input):
     - Exception: If the input file contains data for more than one genome or contig, indicating 
                  it's not supported by this script.
     """
+    print(f"Parsing depth file {depth_input}")
     depth = []
     references = set()
     with open(depth_input) as depth_object:
@@ -46,23 +47,24 @@ def parse_depth(depth_input):
             if position >= len(depth):
                 depth.extend([0] * (position - len(depth) + 1))
             depth[position] = depth_count
+    print(f"Parsed depth file {depth_input}")
     return depth
 
 
-def plot_depth(depth_report, output_name, plot_title, normalize, depth_cut_off):
-    data = parse_depth(depth_report)
-    y_label = "Normalized Depth" if normalize else "Depth"
-    data = [xx / max(data) for xx in data] if normalize else data
+def plot_depth(depth_input, fig_output, plot_title, is_normalize, depth_cut_off):
+    data = parse_depth(depth_input)
+    y_label = "Normalized Depth" if is_normalize else "Depth"
+    data = [xx / max(data) for xx in data] if is_normalize else data
     sns.set_theme(color_codes=True)
     plt.title(plot_title)
     ax = plt.subplot(111)
     sns_plot = sns.lineplot(x=range(len(data)), y=data)
     sns_plot.set(xlabel='Genome Position (bp)', ylabel=y_label)
-    if not normalize:
+    if not is_normalize:
         ax.add_line(lines.Line2D([0, len(data) + 1], [depth_cut_off], color="r"))
-    plt.savefig(output_name, bbox_inches='tight', dpi=400, format='svg')
+    print(f"Generating depth plot as {fig_output}")
+    plt.savefig(fig_output, bbox_inches='tight', dpi=400, format='svg')
     plt.close()
-    # print("Done :)")
 
 
 def main():
