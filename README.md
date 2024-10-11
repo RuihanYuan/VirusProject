@@ -110,12 +110,12 @@ The `dplot` script generates depth plots from a depth file.
 
 **Arguments:**
 
-- -i or --input: Path to the input depth file (required).
-- -o or --output: Path to save the output SVG file (required).
-- -t or --title: Title of the plot (default: “Depth Plot”).
-- -n or --normalize: Normalize the depth values (optional).
-- -c or --cutoff: Depth cutoff value (default: 20).
-- -v or --version: Display the version of the script.
+- `-i` or `--input`: Path to the input depth file (required).
+- `-o` or `--output`: Path to save the output SVG file (required).
+- `-t` or `--title`: Title of the plot (default: “Depth Plot”).
+- `-n` or `--normalize`: Normalize the depth values (optional).
+- `-c` or `--cutoff`: Depth cutoff value (default: 20).
+- `-v` or `--version`: Display the version of the script.
 
 ### aplot
 
@@ -129,10 +129,10 @@ The `aplot` script generates color-coded annotation plots from a GFF file.
 
 **Arguments:**
 
-- -i or --input: Path to the input GFF file (required).
-- -o or --output: Path to save the output SVG file (required).
-- -y or --color_settings: Path to the color settings YAML file (optional, defaults to program settings if left blank).
-- -v or --version: Display the version of the script.
+- `-i` or `--input`: Path to the input GFF file (required).
+- `-o` or `--output`: Path to save the output SVG file (required).
+- `-y` or `--color_settings`: Path to the color settings YAML file (optional, defaults to program settings if left blank).
+- `-v` or `--version`: Display the version of the script.
 
 To make changes to the color map for each annotated product, please do so in the **color_setting.yml** file in the bin folder and pass it in to override the default settings using the -c argument. Supports hex color codes but make sure to place them in quotes.
 
@@ -163,13 +163,13 @@ The `daplot` script generates combined depth and annotation plots sharing a sing
 
 **Arguments:**
 
-- -id or --input_depth: Path to the input depth file (required).
-- -ig or --input_gff: Path to the input GFF file (required).
-- -o or --output: Path to save the output SVG file (required).
-- -n or --normalize: Normalize the depth values (optional).
-- -c or --cutoff: Depth cutoff value (default: 20).
-- -y or --color_settings: Path to the color settings YAML file (optional, defaults to program settings if left blank).
-- -v or --version: Display the version of the script.
+- `-id` or `--input_depth`: Path to the input depth file (required).
+- `-ig` or `--input_gff`: Path to the input GFF file (required).
+- `-o` or `--output`: Path to save the output SVG file (required).
+- `-n` or `--normalize`: Normalize the depth values (optional).
+- `-c` or `--cutoff`: Depth cutoff value (default: 20).
+- `-y` or `--color_settings`: Path to the color settings YAML file (optional, defaults to program settings if left blank).
+- `-v` or `--version`: Display the version of the script.
 
 ## License
 
