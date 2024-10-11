@@ -4,7 +4,18 @@ This repository contains three scripts for generating plots using Python: `dplot
 
 **Note:** This program has experienced a change of developer and is now maintained by Kristian Stevens and Henry Li at [Foundation Plant Services](https://fps.ucdavis.edu/index.cfm) (FPS) at [UC Davis](https://www.ucdavis.edu/) following its initial development by Ruihan Yuan. Additionally, one of the dependencies, [BCBio](https://github.com/bcbio/bcbio-nextgen), stopped receiving support as of 08-16-2024 and is no longer installable from pip. Therefore, the installation instructions now include steps to install dependencies using `conda`.
 
-Jump to [Installation](#installation), [Preparation](#preparation), or [Usage](#usage).
+## Table of Content
+
+- [Read-depth and Product Annotation Plotting Tools](#read-depth-and-product-annotation-plotting-tools)
+  - [Table of Content](#table-of-content)
+  - [Overview](#overview)
+  - [Installation](#installation)
+  - [Preparation](#preparation)
+  - [Usage](#usage)
+    - [dplot](#dplot)
+    - [aplot](#aplot)
+    - [daplot](#daplot)
+  - [License](#license)
 
 ## Overview
 
