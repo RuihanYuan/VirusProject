@@ -5,13 +5,14 @@
 
 import argparse
 import os
+import sys
 import yaml
 
 from BCBio import GFF
 from dna_features_viewer import GraphicFeature, GraphicRecord
 
 
-__version__ = "1.2.0"  # 2024/10/13 HB+3
+__version__ = "1.3.0"  # 2024/10/13 HB+3
 
 
 def parse_gff3(gff_input: str, color_mapping, default_color):
@@ -78,10 +79,10 @@ def main():
 
 	"""input checks"""
 	if not os.path.exists(args.input):
-		raise Exception(f'Error: Input file {args.input} does not exist')
+		sys.exit(f'Error: Input file {args.input} does not exist')
 
 	if not args.input.endswith('.gff3'):
-		raise Exception(f'Error: Input GFF file {args.input_gff} type error.\nFile type "gff3" expected')
+		sys.exit(f'Error: Input GFF file {args.input_gff} type error.\nFile type "gff3" expected')
 
 	"""color settings"""
 	color_mapping = {
@@ -95,7 +96,7 @@ def main():
 
 	default_color = "#D9D9D6"
 
-	# Load color settings from the YAML file if provided
+	"""color custom settings"""
 	if args.color_settings:
 		color_mapping, default_color = load_color_settings(args.color_settings)
 
@@ -103,7 +104,6 @@ def main():
 	graphic_record = parse_gff3(args.input, color_mapping, default_color)
 
 	"""plotting"""
-	# Plot the graphic record
 	plot_annotation(graphic_record, args.output)
 
 

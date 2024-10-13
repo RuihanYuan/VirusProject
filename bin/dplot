@@ -5,15 +5,16 @@
 
 import argparse
 import os
+import sys
 
 import seaborn as sns
 from matplotlib import pyplot as plt, lines
 
 
-__version__ = "1.2.0"  # 2024/10/13 HB+3
+__version__ = "1.3.0"  # 2024/10/13 HB+3
 
 
-def parse_depth(depth_input):
+def parse_depth(depth_input, max_depth):
 	print(f"Parsing depth file {depth_input}")
 	depth_list = []
 	genome_id_stored = None
@@ -23,13 +24,25 @@ def parse_depth(depth_input):
 			if genome_id_stored is None:
 				genome_id_stored = genome_id
 			elif genome_id != genome_id_stored:
-				raise Exception('Error: 1 genome/contig expected')
+				sys.exit('Error: 1 genome/contig expected')
 			position = int(position) - 1
 			depth_count = int(depth_count)
 			if position >= len(depth_list):
 				depth_list.extend([0] * (position - len(depth_list) + 1))
 			depth_list[position] = depth_count
 	print(f"Parsed depth file {depth_input}")
+	if max_depth:
+		depth_list_temp = []
+		for depth in depth_list:
+			if depth <= max_depth:
+				depth_list_temp.append(depth)
+		print(f"Maximum depth is set to {max_depth}")
+		count_before_filter = len(depth_list)
+		count_after_filter = len(depth_list_temp)
+		count_filtered = count_before_filter - count_after_filter
+		preservation_rate = count_after_filter / count_before_filter
+		print(f"Filtered {count_filtered} out of the total {count_before_filter} positions, preserving {preservation_rate:.2%}")
+		return depth_list_temp
 	return depth_list
 
 
@@ -67,6 +80,9 @@ def main():
 						default="Depth Plot",
 						help=('title of the plot\n'
 							  'default = "Depth Plot"'))
+	parser.add_argument("-m", "--max_depth",
+						type=int,
+	                    help='maximum depth value')
 	parser.add_argument("-n", "--normalize",
 						action="store_true",
 						help=('normalize the depth values\n'
@@ -84,10 +100,13 @@ def main():
 
 	"""input checks"""
 	if not os.path.exists(args.input):
-		raise Exception(f'Error: Input file {args.input} does not exist')
+		sys.exit(f'Error: Input file {args.input} does not exist')
+	
+	if args.max_depth is not None and args.max_depth <= 0:
+		sys.exit(f'Error: Maximum depth is set to {args.max_depth} while >0 is expected.')
 
 	"""parsing input"""
-	depth_list = parse_depth(args.input)
+	depth_list = parse_depth(args.input, args.max_depth)
 
 	"""plotting"""
 	plot_depth(depth_list, args.output, args.title, args.normalize, args.cutoff)

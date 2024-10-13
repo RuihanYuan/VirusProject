@@ -126,6 +126,7 @@ The `dplot` script generates depth plots from a depth file.
 - `-i` or `--input`: Path to the input depth file (required).
 - `-o` or `--output`: Path to save the output SVG file (required).
 - `-t` or `--title`: Title of the plot (default: “Depth Plot”).
+- `-m` or `--max_depth`: Maximum depth value (optional, >0).
 - `-n` or `--normalize`: Normalize the depth values (optional).
 - `-c` or `--cutoff`: Depth cutoff value (default: 20).
 - `-v` or `--version`: Display the version of the script.
@@ -179,6 +180,7 @@ The `daplot` script generates combined depth and annotation plots sharing a sing
 - `-id` or `--input_depth`: Path to the input depth file (required).
 - `-ig` or `--input_gff`: Path to the input GFF file (required).
 - `-o` or `--output`: Path to save the output SVG file (required).
+- `-m` or `--max_depth`: Maximum depth value (optional, >0).
 - `-n` or `--normalize`: Normalize the depth values (optional).
 - `-c` or `--cutoff`: Depth cutoff value (default: 20).
 - `-y` or `--color_settings`: Path to the color settings YAML file (optional, defaults to program settings if left blank).
