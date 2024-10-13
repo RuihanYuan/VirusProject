@@ -1,49 +1,50 @@
 #! /usr/bin/env python
 # daplot.py
-# creates a combined depth and annotation plot from a depth file and a GFF file
+# creates a combined depth and annotation plot from a depth file and a gff3 file
 
 
+import argparse
+import os
+import yaml
+
+from BCBio import GFF
 from dna_features_viewer import GraphicFeature, GraphicRecord
 import seaborn as sns
 from matplotlib import pyplot as plt, lines
-from BCBio import GFF
-import argparse
-import yaml
 
 
-__version__ = "1.1.0"  # 2024/10/11 HB+1
+__version__ = "1.2.0"  # 2024/10/13 HB+3
 
 
 def parse_depth(depth_input):
 	print(f"Parsing depth file {depth_input}")
-	depth = []
-	references = set()
+	depth_list = []
+	genome_id_stored = None
 	with open(depth_input) as depth_object:
 		for row in depth_object:
 			genome_id, position, depth_count = row.split()
-			references.add(genome_id)
-			# If multiple genome IDs have been found, raise error
-			if len(references) > 1:
-				raise Exception('This script only handles one genome - contig.')
+			if genome_id_stored is None:
+				genome_id_stored = genome_id
+			elif genome_id != genome_id_stored:
+				raise Exception('Error: 1 genome/contig expected')
 			position = int(position) - 1
-			# Num of reads covers a specific position in the genome
 			depth_count = int(depth_count)
-			if position >= len(depth):
-				depth.extend([0] * (position - len(depth) + 1))
-			depth[position] = depth_count
+			if position >= len(depth_list):
+				depth_list.extend([0] * (position - len(depth_list) + 1))
+			depth_list[position] = depth_count
 	print(f"Parsed depth file {depth_input}")
-	return depth
+	return depth_list
 
 
-def plot_depth(ax, depth_input, is_normalize, depth_cut_off):
-	data = parse_depth(depth_input)
-	y_label = "Normalized Coverage" if is_normalize else "Coverage"
-	data = [xx / max(data) for xx in data] if is_normalize else data
-	sns.set_theme(color_codes=True)
-	sns.lineplot(x=range(len(data)), y=data, ax=ax)
-	ax.set(xlabel='Genome Position (bp)', ylabel=y_label)
-	if not is_normalize:
-		ax.add_line(lines.Line2D([0, len(data) + 1], [depth_cut_off], color="r"))
+def plot_depth(ax, depth_list, is_normalize, depth_cut_off):
+    y_label = "Normalized Depth" if is_normalize else "Depth"
+    if is_normalize:
+        depth_list = [xx / max(depth_list) for xx in depth_list]
+    sns.set_theme(color_codes=True)
+    sns.lineplot(x=range(len(depth_list)), y=depth_list, ax=ax)
+    ax.set(xlabel='Genome Position (bp)', ylabel=y_label)
+    if not is_normalize:
+        ax.add_line(lines.Line2D([0, len(depth_list) + 1], [depth_cut_off], color="r"))
 
 
 def load_color_settings(yml_file):
@@ -53,7 +54,31 @@ def load_color_settings(yml_file):
 	return settings['color_mapping'], settings['default_color']
 
 
+def parse_gff3(gff_input: str, color_mapping, default_color):
+	graphic_features = []
+	print(f"Parsing GFF file {gff_input}")
+
+	with open(gff_input, "r") as gff_infile:
+		for gff_record in GFF.parse(gff_infile):
+			for feature in gff_record.features:
+				if feature.type == "CDS":
+					product = feature.qualifiers.get('product', [''])[0]
+					color = color_mapping.get(product, default_color)
+					graphic_feature = GraphicFeature(
+						start  = int(feature.location.start),
+						end    = int(feature.location.end),
+						strand = feature.location.strand,
+						color  = color,
+						label  = product
+					)
+					graphic_features.append(graphic_feature)
+
+	print(f"Parsed GFF file {gff_input}")
+	return GraphicRecord(sequence_length=len(gff_record.seq), features=graphic_features)
+
+
 def main():
+	"""argparse statements"""
 	parser = argparse.ArgumentParser(description="Generate combined depth and annotation plots from a depth file and a GFF file.",
 									 formatter_class=argparse.RawTextHelpFormatter)
 	parser.add_argument("-id", "--input_depth",
@@ -87,6 +112,16 @@ def main():
 
 	args = parser.parse_args()
 
+	"""input checks"""
+	if not os.path.exists(args.input_depth):
+		raise Exception(f'Error: Input depth file {args.input_depth} does not exist')
+	if not os.path.exists(args.input_gff):
+		raise Exception(f'Error: Input GFF file {args.input_gff} does not exist')
+	
+	if not args.input_gff.endswith('.gff3'):
+		raise Exception(f'Error: Input GFF file {args.input_gff} type error.\nFile type "gff3" expected')
+
+	"""color settings"""
 	color_mapping = {
 		"P0 protein": "#da9100",
 		"RNA-dependent RNA polymerase": "#009B77",
@@ -102,34 +137,14 @@ def main():
 	if args.color_settings:
 		color_mapping, default_color = load_color_settings(args.color_settings)
 
+	"""parsing input"""
+	depth_list = parse_depth(args.input_depth)
+	graphic_record = parse_gff3(args.input_gff, color_mapping, default_color)
+
+	"""plotting"""
 	fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(6, 3.5), sharex=True, gridspec_kw={"height_ratios": [3, 1]})
-
-	graphic_features = []
-	print(f"Parsing GFF file {args.input_gff}")
-	# Parse the GFF3 file, create and add GraphicFeature objects to list
-	with open(args.input_gff, "r") as gff_input:
-		for gff_record in GFF.parse(gff_input):
-			for feature in gff_record.features:
-				if feature.type == "CDS":
-					product = feature.qualifiers.get('product', [''])[0]
-					color = color_mapping.get(product, default_color)
-					graphic_feature = GraphicFeature(
-						start  = int(feature.location.start),
-						end    = int(feature.location.end),
-						strand = feature.location.strand,
-						color  = color,
-						label  = product
-					)
-					graphic_features.append(graphic_feature)
-
-			# Create a GraphicRecord with one GraphicFeature object
-			graphic_record = GraphicRecord(sequence_length=len(gff_record), features=graphic_features)
-
-			# Plot the graphic record on the first subplot
-			graphic_record.plot(ax=ax1)
-	print(f"Parsed GFF file {args.input_gff}")
-
-	plot_depth(ax2, args.input_depth, is_normalize=args.normalize, depth_cut_off=args.cutoff)
+	graphic_record.plot(ax=ax1)
+	plot_depth(ax2, depth_list, is_normalize=args.normalize, depth_cut_off=args.cutoff)
 	plt.tight_layout()
 	print(f"Generating depth-annotation combined plot as {args.output}")
 	fig.savefig(args.output, format='svg')

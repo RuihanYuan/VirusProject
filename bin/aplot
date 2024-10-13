@@ -1,28 +1,61 @@
 #! /usr/bin/env python
 # aplot.py
-# creates a color-coded annotation plot from a gff file
+# creates a color-coded annotation plot from a gff3 file
 
+
+import argparse
+import os
+import yaml
 
 from BCBio import GFF
 from dna_features_viewer import GraphicFeature, GraphicRecord
-import argparse
-import yaml
 
 
-__version__ = "1.1.0"  # 2024/10/11 HB+1
+__version__ = "1.2.0"  # 2024/10/13 HB+3
+
+
+def parse_gff3(gff_input: str, color_mapping, default_color):
+	graphic_features = []
+	print(f"Parsing GFF file {gff_input}")
+	with open(gff_input, "r") as gff_infile:
+		for gff_record in GFF.parse(gff_infile):
+			for feature in gff_record.features:
+				if feature.type == "CDS":
+					product = feature.qualifiers.get('product', [''])[0]
+					color = color_mapping.get(product, default_color)
+					graphic_feature = GraphicFeature(
+						start  = int(feature.location.start),
+						end    = int(feature.location.end),
+						strand = feature.location.strand,
+						color  = color,
+						label  = product
+					)
+					graphic_features.append(graphic_feature)
+	print(f"Parsed GFF file {gff_input}")
+	return GraphicRecord(sequence_length=len(gff_record.seq), features=graphic_features)
 
 
 def load_color_settings(yml_file):
-	'''
-	To make changes to the annotation colors please visit the color_setting.yml 
+	"""
+	To make changes to the annotation colors please visit the color_setting.yml
 	file in the bin folder and pass it in using the -c argument
-	'''
+	"""
 	with open(yml_file, 'r') as file:
 		settings = yaml.safe_load(file)
 	return settings['color_mapping'], settings['default_color']
 
 
+def plot_annotation(graphic_record: GraphicRecord, output_path):
+	print(f"Generating annotation plot as {output_path}")
+	ax, _ = graphic_record.plot(figure_width=10)
+	ax.figure.tight_layout()
+	ax.figure.savefig(output_path, format='svg')
+	print("----PLOT GENERATED----")
+	return None
+
+
 def main():
+	"""argparse statements"""
 	parser = argparse.ArgumentParser(description="Generate annotation plots from GFF files.",
 									 formatter_class=argparse.RawTextHelpFormatter)
 	parser.add_argument("-i", "--input",
@@ -43,6 +76,14 @@ def main():
 
 	args = parser.parse_args()
 
+	"""input checks"""
+	if not os.path.exists(args.input):
+		raise Exception(f'Error: Input file {args.input} does not exist')
+
+	if not args.input.endswith('.gff3'):
+		raise Exception(f'Error: Input GFF file {args.input_gff} type error.\nFile type "gff3" expected')
+
+	"""color settings"""
 	color_mapping = {
 		"P0 protein": "#da9100",
 		"RNA-dependent RNA polymerase": "#009B77",
@@ -58,38 +99,12 @@ def main():
 	if args.color_settings:
 		color_mapping, default_color = load_color_settings(args.color_settings)
 
-	# Initialize empty list
-	graphic_features = []
+	"""parsing input"""
+	graphic_record = parse_gff3(args.input, color_mapping, default_color)
 
-	print(f"Parsing GFF file {args.input}")
-	# Parse the GFF3 file, create and add GraphicFeature objects to list
-	with open(args.input, "r") as gff_input:
-		for gff_record in GFF.parse(gff_input):
-			for feature in gff_record.features:
-				if feature.type == "CDS":
-					product = feature.qualifiers.get('product', [''])[0]
-					color = color_mapping.get(product, default_color)
-					graphic_feature = GraphicFeature(
-						start  = int(feature.location.start),
-						end    = int(feature.location.end),
-						strand = feature.location.strand,
-						color  = color,
-						label  = product
-					)
-					graphic_features.append(graphic_feature)
-	print(f"Parsed GFF file {args.input}")
-
-	# Create a GraphicRecord outside the loop, after all features have been added to the list
-	graphic_record = GraphicRecord(sequence_length=len(gff_record.seq), features=graphic_features)
-
+	"""plotting"""
 	# Plot the graphic record
-	ax, _ = graphic_record.plot(figure_width=10)
-	ax.figure.tight_layout()
-	print(f"Generating annotation plot as {args.output}")
-	# Save the figure to a svg file
-	ax.figure.savefig(args.output, format='svg')
-
-	print("----PLOT GENERATED----")
+	plot_annotation(graphic_record, args.output)
 
 
 if __name__ == '__main__':

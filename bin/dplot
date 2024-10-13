@@ -3,71 +3,55 @@
 # creates a depth plot from a depth file
 
 
+import argparse
+import os
+
 import seaborn as sns
 from matplotlib import pyplot as plt, lines
-import argparse
 
 
-__version__ = "1.1.0"  # 2024/10/11 HB+1
+__version__ = "1.2.0"  # 2024/10/13 HB+3
 
 
 def parse_depth(depth_input):
-	"""
-	Parses a depth file to extract sequencing depth information for a single genome or contig.
-
-	This function reads a depth file where each row contains a genome identifier, position, 
-	and depth count. It accumulates depth counts into a list, ensuring each position is 
-	accurately represented. The function is designed to handle files pertaining to a single 
-	genome or contig; it will raise an exception if multiple genome identifiers are detected.
-
-	Parameters:
-	- depth_input (str): The path to the input depth file. Each line of the file should follow 
-	  the format: 'genome_id position depth_count'.
-
-	Returns:
-	- list: A list of integers representing the sequencing depth at each position of the genome.
-			The list index corresponds to the genome position (0-indexed), and the value at each 
-			index is the depth count for that position.
-
-	Raises:
-	- Exception: If the input file contains data for more than one genome or contig, indicating 
-				 it's not supported by this script.
-	"""
 	print(f"Parsing depth file {depth_input}")
-	depth = []
-	references = set()
+	depth_list = []
+	genome_id_stored = None
 	with open(depth_input) as depth_object:
 		for row in depth_object:
 			genome_id, position, depth_count = row.split()
-			references.add(genome_id)
-			if len(references) > 1:
-				raise Exception('This script only handles one genome - contig.')
+			if genome_id_stored is None:
+				genome_id_stored = genome_id
+			elif genome_id != genome_id_stored:
+				raise Exception('Error: 1 genome/contig expected')
 			position = int(position) - 1
 			depth_count = int(depth_count)
-			if position >= len(depth):
-				depth.extend([0] * (position - len(depth) + 1))
-			depth[position] = depth_count
+			if position >= len(depth_list):
+				depth_list.extend([0] * (position - len(depth_list) + 1))
+			depth_list[position] = depth_count
 	print(f"Parsed depth file {depth_input}")
-	return depth
+	return depth_list
 
 
-def plot_depth(depth_input, fig_output, plot_title, is_normalize, depth_cut_off):
-	data = parse_depth(depth_input)
+def plot_depth(depth_list, fig_output, plot_title, is_normalize, depth_cut_off):
 	y_label = "Normalized Depth" if is_normalize else "Depth"
-	data = [xx / max(data) for xx in data] if is_normalize else data
+	if is_normalize:
+		depth_list = [xx / max(depth_list) for xx in depth_list]
 	sns.set_theme(color_codes=True)
 	plt.title(plot_title)
 	ax = plt.subplot(111)
-	sns_plot = sns.lineplot(x=range(len(data)), y=data)
+	sns_plot = sns.lineplot(x=range(len(depth_list)), y=depth_list)
 	sns_plot.set(xlabel='Genome Position (bp)', ylabel=y_label)
 	if not is_normalize:
-		ax.add_line(lines.Line2D([0, len(data) + 1], [depth_cut_off], color="r"))
+		ax.add_line(lines.Line2D([0, len(depth_list) + 1], [depth_cut_off], color="r"))
 	print(f"Generating depth plot as {fig_output}")
 	plt.savefig(fig_output, bbox_inches='tight', dpi=400, format='svg')
+	print("----PLOT GENERATED----")
 	plt.close()
 
 
 def main():
+	"""argparse statements"""
 	parser = argparse.ArgumentParser(description="Generate depth plots from a depth file.",
 									 formatter_class=argparse.RawTextHelpFormatter)
 	parser.add_argument("-i", "--input",
@@ -98,9 +82,15 @@ def main():
 
 	args = parser.parse_args()
 
-	plot_depth(args.input, args.output, args.title, args.normalize, args.cutoff)
+	"""input checks"""
+	if not os.path.exists(args.input):
+		raise Exception(f'Error: Input file {args.input} does not exist')
 
-	print("----PLOT GENERATED----")
+	"""parsing input"""
+	depth_list = parse_depth(args.input)
+
+	"""plotting"""
+	plot_depth(depth_list, args.output, args.title, args.normalize, args.cutoff)
 
 
 if __name__ == '__main__':
