@@ -1,5 +1,7 @@
 # Read-depth and Product Annotation Plotting Tools
 
+**DEPRECATED!!!** Effective May 1st 2025. For future updates, see [DAplot](https://github.com/Vanishborn/DAplot).
+
 This repository contains three scripts for generating plots using Python: `dplot`, `aplot`, and `daplot`. These tools are designed to create read depth plots, CDS product annotation plots, and combined depth and annotation plots, respectively.
 
 **Note:** This program has experienced a change of developer and is now maintained by Kristian Stevens and Henry Li at [Foundation Plant Services](https://fps.ucdavis.edu/index.cfm) (FPS) at [UC Davis](https://www.ucdavis.edu/) following its initial development by Ruihan Yuan. Additionally, one of the dependencies, [BCBio](https://github.com/bcbio/bcbio-nextgen), stopped receiving support as of 08-16-2024 and is no longer installable from pip. Therefore, the installation instructions now include steps to install dependencies using `conda`.
